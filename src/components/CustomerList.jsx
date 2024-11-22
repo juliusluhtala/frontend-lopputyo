@@ -41,13 +41,12 @@ export default function CustomerList() {
         <>
             <div className="ag-theme-material" style={{ width: 900, height: 400 }}>
                 <AgGridReact
-                    rowData={cars}
+                    rowData={customers}
                     columnDefs={colDefs}
                     pagination={true}
                     paginationPageSize={5}
                     paginationPageSizeSelector={false}
-                >
-                </AgGridReact>
+                />
             </div>
         </>
     )
