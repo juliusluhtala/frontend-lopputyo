@@ -1,5 +1,6 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
 import { useState } from "react";
+import { useEffect } from "react";
 
 export default function EditCustomer(props)  {
     const { params, saveEditCustomer } = props;
@@ -22,7 +23,13 @@ export default function EditCustomer(props)  {
     }
 
     const handleSave = () => {
-        props.saveEditCustomer(customer, data.id);
+        const id = props.params.data._links.customer.href.split('/').pop();
+        console.log(id);
+        if (!id) {
+            console.error('Customer ID is missing');
+            return;
+        }
+        props.saveEditCustomer(customer, id);
         setOpen(false);
         setCustomer({firstname: '', lastname: '', streetaddress: '', postcode: '', city: '', email: '', phone: ''})
     }

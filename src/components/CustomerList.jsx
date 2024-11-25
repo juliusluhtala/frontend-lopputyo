@@ -22,11 +22,11 @@ export default function CustomerList() {
         {field: 'city', flex:1},
         {field: 'email', flex:1},
         {field: 'phone', flex:1},
-        {cellRenderer: (params) =>
+        {maxWidth: 120, cellRenderer: (params) =>
             <Button size="small" color="error" onClick={() => deleteCustomer(params)}>Delete</Button>
         },
-        {cellRenderer: (params) => 
-            <EditCustomer params={params} saveEditCustomer={(customer) => saveEditCustomer(customer, params.data.id)}/>
+        {maxWidth: 120, cellRenderer: (params) => 
+            <EditCustomer params={params} saveEditCustomer={saveEditCustomer}/>
         }
     ]);
 
@@ -116,7 +116,8 @@ export default function CustomerList() {
     return (
         <>
             <AddCustomer saveAddCustomer={saveAddCustomer}/>
-            <div className="ag-theme-material" style={{ width: 900, height: 400 }}>
+            <div style={{ display: "grid", justifyContent: "center"}}>
+            <div className="ag-theme-material" style={{ width: 1500, height: 400 }}>
                 <AgGridReact
                     rowData={customers}
                     columnDefs={colDefs}
@@ -130,6 +131,7 @@ export default function CustomerList() {
                     autoHideDuration={3000}
                     onClose={() => setOpenSnackbar(false)}
                 />
+            </div>
             </div>
         </>
     )
