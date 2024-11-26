@@ -4,7 +4,7 @@ import { AgGridReact } from "ag-grid-react";
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-material.css";
-import { Button, Snackbar } from "@mui/material";
+import { Button, Snackbar, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 import AddCustomer from "./AddCustomer";
 import EditCustomer from "./EditCustomer";
 
@@ -13,6 +13,8 @@ export default function CustomerList() {
     const [customers, setCustomers] = useState([{firstname: '', lastname: '', streetaddress: '', postcode: '', city: '', email: '', phone: ''}])
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [msg, setMsg] = useState("");
+    const [openConfirmDialog, setOpenConfirmDialog] = useState(false); // Vahvistusdialogi
+    const [customerToDelete, setCustomerToDelete] = useState(null);
 
     const [colDefs, setColDefs] = useState([
         {field: 'firstname', flex:1},
@@ -80,20 +82,31 @@ export default function CustomerList() {
     }
 
     const deleteCustomer = (params) => {
-        console.log("params ", params.data._links.customer.href);
-        fetch(params.data._links.customer.href,
+        setCustomerToDelete(params.data); // Tallenna poistettava asiakas
+        setOpenConfirmDialog(true); // Avaa vahvistusdialogi
+    }
+
+    const handleDeleteConfirm = () => {
+        const customerUrl = customerToDelete._links.customer.href;
+
+        fetch(customerUrl,
             { method: 'DELETE' })
             .then(response => {
                 if (response.ok) {
                     setOpenSnackbar(true);
                     setMsg("Delete succeed");
-                    getCars();
+                    getCustomers();
                 }
                 else {
                     openSnackbar(false);
                 }
             })
             .catch(err => console.error(err.data))
+            setOpenConfirmDialog(false);
+    }
+
+    const handleDeleteCancel = () => {
+        setOpenConfirmDialog(false); // Sulje vahvistusdialogi ilman poistoa
     }
 
     useEffect(() => getCustomers(), [])
@@ -131,6 +144,20 @@ export default function CustomerList() {
                     autoHideDuration={3000}
                     onClose={() => setOpenSnackbar(false)}
                 />
+                <Dialog open={openConfirmDialog} onClose={handleDeleteCancel}>
+                    <DialogTitle>Confirm Deletion</DialogTitle>
+                    <DialogContent>
+                        <p>Are you sure you want to delete this customer?</p>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleDeleteCancel} color="primary">
+                            Cancel
+                        </Button>
+                        <Button onClick={handleDeleteConfirm} color="error">
+                            Confirm
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </div>
             </div>
         </>

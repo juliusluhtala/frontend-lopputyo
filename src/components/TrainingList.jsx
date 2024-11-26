@@ -3,7 +3,7 @@ import { useState } from "react";
 import { AgGridReact } from "ag-grid-react";
 import dayjs from "dayjs";
 import AddTraining from "./AddTraining";
-import { Button, Snackbar } from "@mui/material";
+import { Button, Snackbar, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-material.css";
 
@@ -12,6 +12,8 @@ export default function TrainingList() {
     const [trainings, setTrainings] = useState([]);
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [msg, setMsg] = useState("");
+    const [openConfirmDialog, setOpenConfirmDialog] = useState(false); // Vahvistusdialogi
+    const [trainingToDelete, setTrainingToDelete] = useState(null);
 
     const [colDefs, setColDefs] = useState([
         {field: 'date', flex:1},
@@ -24,20 +26,31 @@ export default function TrainingList() {
     ]);
 
     const deleteTraining = (params) => {
-        const trainingId = params.data.id;
+        setTrainingToDelete(params.data);
+        setOpenConfirmDialog(true);
+    }
+
+    const handleDeleteConfirm = () => {
+        const trainingId = trainingToDelete.id;
+            
         fetch(`https://customer-rest-service-frontend-personaltrainer.2.rahtiapp.fi/api/trainings/${trainingId}`,
             { method: 'DELETE' })
             .then(response => {
                 if (response.ok) {
                     setOpenSnackbar(true);
                     setMsg("Delete succeed");
-                    getCars();
+                    getTrainings();
                 }
                 else {
                     openSnackbar(false);
                 }
             })
             .catch(err => console.error(err.data))
+            setOpenConfirmDialog(false);
+    }
+
+    const handleDeleteCancel = () => {
+        setOpenConfirmDialog(false); // Sulje vahvistusdialogi ilman poistoa
     }
 
     const saveTraining = (training) => {
@@ -104,6 +117,20 @@ export default function TrainingList() {
                     autoHideDuration={3000}
                     onClose={() => setOpenSnackbar(false)}
                 />
+                <Dialog open={openConfirmDialog} onClose={handleDeleteCancel}>
+                    <DialogTitle>Confirm Deletion</DialogTitle>
+                    <DialogContent>
+                        <p>Are you sure you want to delete this training session?</p>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleDeleteCancel} color="primary">
+                            Cancel
+                        </Button>
+                        <Button onClick={handleDeleteConfirm} color="error">
+                            Confirm
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </div>
         </>
     );
